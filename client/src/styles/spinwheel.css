@@ -1,0 +1,348 @@
+/* client/src/styles/spinwheel.css */
+/* Spin-to-Dine wheel styles */
+
+.spin-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.spin-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.spin-header h1 {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.spin-header p {
+  color: var(--text-light);
+  font-size: 1.1rem;
+}
+
+.spin-counter {
+  background: white;
+  padding: 15px 25px;
+  border-radius: 30px;
+  display: inline-block;
+  margin-top: 20px;
+  box-shadow: var(--shadow);
+}
+
+.spin-counter strong {
+  color: var(--primary-color);
+  font-size: 1.3rem;
+}
+
+/* Spin Wheel Wrapper */
+.spin-wheel-wrapper {
+  position: relative;
+  width: 350px;
+  height: 350px;
+  margin: 0 auto 40px;
+}
+
+.spin-wheel {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(
+    #ff6b35 0deg 72deg,
+    #f39c12 72deg 144deg,
+    #e74c3c 144deg 216deg,
+    #9b59b6 216deg 288deg,
+    #3498db 288deg 360deg
+  );
+  border: 8px solid #333;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+  position: relative;
+  overflow: hidden;
+}
+
+.spin-wheel.spinning {
+  animation: pulse 0.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+  50% { box-shadow: 0 10px 50px rgba(255, 107, 53, 0.5); }
+}
+
+.wheel-segment {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  left: 50%;
+  top: 50%;
+  transform-origin: 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 40px;
+}
+
+.segment-text {
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  transform: rotate(36deg);
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Spin Button */
+.spin-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: #333;
+  color: white;
+  border: 4px solid white;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s;
+  z-index: 10;
+}
+
+.spin-button:hover:not(:disabled) {
+  background: var(--primary-color);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.spin-button:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+/* Suggestions List */
+.suggestions-list {
+  margin-top: 40px;
+}
+
+.suggestions-list h3 {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 1.8rem;
+}
+
+.suggestions-subtitle {
+  text-align: center;
+  color: var(--text-light);
+  margin-bottom: 30px;
+}
+
+.suggestions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.suggestion-card {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.suggestion-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.suggestion-rank {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--primary-color);
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.suggestion-card img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 15px 0;
+}
+
+.suggestion-card h4 {
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.suggestion-restaurant {
+  color: var(--text-light);
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.suggestion-price {
+  font-weight: 700;
+  color: var(--primary-color);
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+}
+
+/* Match Score */
+.match-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.score-label {
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+.score-bar {
+  width: 60px;
+  height: 6px;
+  background: #eee;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.score-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #27ae60, #2ecc71);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.score-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #27ae60;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 30px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-light);
+}
+
+.modal-content h2 {
+  color: var(--primary-color);
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.modal-image {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 20px;
+}
+
+.modal-details {
+  text-align: left;
+  margin-bottom: 25px;
+}
+
+.modal-details p {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .spin-wheel-wrapper {
+    width: 280px;
+    height: 280px;
+  }
+  
+  .spin-button {
+    width: 55px;
+    height: 55px;
+    font-size: 0.85rem;
+  }
+  
+  .segment-text {
+    font-size: 0.7rem;
+    padding-left: 25px;
+  }
+  
+  .suggestions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .suggestion-card img {
+    width: 80px;
+    height: 80px;
+  }
+}
