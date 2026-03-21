@@ -78,43 +78,17 @@ const getRestaurantById = async (req, res) => {
 // @access  Public
 const getRestaurantMenu = async (req, res) => {
   try {
-    const axios = require("axios");
+    // Look for all menu items that belong to this restaurant's ID
+    const menu = await Menu.find({ restaurantId: req.params.id });
 
-    const getRestaurantMenu = async (req, res) => {
-      try {
-        const response = await axios.get(
-          "https://www.themealdb.com/api/json/v1/1/search.php?s="
-        );
-
-        const meals = response.data.meals;
-
-        // Map API data → your format
-        const formattedMenu = meals.map((item) => ({
-          _id: item.idMeal,
-          name: item.strMeal,
-          price: Math.floor(Math.random() * 300) + 100, // fake price
-          category: item.strCategory || "Main",
-          veg: true, // API doesn't provide veg/non-veg
-          imageUrl: item.strMealThumb,
-          restaurantId: req.params.id
-        }));
-
-        res.json(formattedMenu);
-      } catch (error) {
-        res.status(500).json({ message: error.message });
-      }
-    };
-
-    if (!menu || menu.length === 0) {
-      return res.status(404).json({ message: 'Menu not found for this restaurant' });
-    }
-
-    res.json(menu);
+    // It's okay if a menu is empty, but we'll return an empty array []
+    // so the frontend doesn't crash.
+    res.json(menu || []); 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Menu Fetch Error:", error.message);
+    res.status(500).json({ message: "Error fetching menu items" });
   }
 };
-
 // @desc    Get all menu items
 // @route   GET /api/restaurants/menu/all
 // @access  Public

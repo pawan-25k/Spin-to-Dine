@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
 const Orders = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   
   const [orders, setOrders] = useState([]);

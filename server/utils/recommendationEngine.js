@@ -1,39 +1,39 @@
 // server/utils/recommendationEngine.js
 // Smart recommendation engine for the Spin-to-Dine feature
 
-const Menu = require('../models/Menu');
-const Order = require('../models/Order');
-const User = require('../models/User');
+const Menu = require("../models/Menu");
+const Order = require("../models/Order");
+const User = require("../models/User");
 
 // Time slot mapping
 const getTimeSlot = () => {
   const hour = new Date().getHours();
-  if (hour >= 6 && hour < 11) return 'breakfast';
-  if (hour >= 11 && hour < 16) return 'lunch';
-  if (hour >= 16 && hour < 21) return 'dinner';
-  return 'snacks';
+  if (hour >= 6 && hour < 11) return "breakfast";
+  if (hour >= 11 && hour < 16) return "lunch";
+  if (hour >= 16 && hour < 21) return "dinner";
+  return "snacks";
 };
 
 // Category mapping based on time of day
 const timeSlotCategories = {
-  breakfast: ['breakfast', 'beverages'],
-  lunch: ['lunch', 'dinner', 'beverages'],
-  dinner: ['lunch', 'dinner', 'desserts'],
-  snacks: ['snacks', 'beverages', 'desserts']
+  breakfast: ["breakfast", "beverages"],
+  lunch: ["lunch", "dinner", "beverages"],
+  dinner: ["lunch", "dinner", "desserts"],
+  snacks: ["snacks", "beverages", "desserts"],
 };
 
 // Budget range mapping to price ranges
 const budgetPriceRanges = {
   low: { min: 0, max: 150 },
   medium: { min: 0, max: 350 },
-  high: { min: 0, max: 1000 }
+  high: { min: 0, max: 1000 },
 };
 
 /**
  * Generate smart dish suggestions for a user
  * Scoring formula:
  * Score = (PastOrderFrequency × 0.4) + (TimeMatch × 0.2) + (LocationTrend × 0.2) + (BudgetMatch × 0.2)
- * 
+ *
  * @param {string} userId - The user's ID
  * @returns {Array} - Array of suggested dishes with scores
  */
@@ -42,7 +42,7 @@ const generateSmartSuggestions = async (userId) => {
     // Get user data
     const user = await User.findById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
 
     // Get user's past orders
@@ -51,40 +51,53 @@ const generateSmartSuggestions = async (userId) => {
       .limit(50);
 
     // Get all available menu items
-    const allMenuItems = []
-      .populate('restaurantId', 'name location rating');
-
+    // ✅ This actually talks to your Database
+    const allMenuItems = await Menu.find({ available: true }).populate(
+      "restaurantId",
+      "name location rating",
+    );
     // Get time slot and categories
     const currentTimeSlot = getTimeSlot();
     const relevantCategories = timeSlotCategories[currentTimeSlot];
-    
+
     // Get user's budget range
-    const userBudget = budgetPriceRanges[user.budgetRange] || budgetPriceRanges.medium;
+    const userBudget =
+      budgetPriceRanges[user.budgetRange] || budgetPriceRanges.medium;
 
     // Calculate scores for each menu item
-    const scoredItems = allMenuItems.map(menuItem => {
+    const scoredItems = allMenuItems.map((menuItem) => {
       const menu = menuItem;
       const restaurant = menu.restaurantId;
 
       // 1. Past Order Frequency Score (0.4 weight)
-      const pastOrderFrequency = calculatePastOrderFrequency(userOrders, menu._id);
+      const pastOrderFrequency = calculatePastOrderFrequency(
+        userOrders,
+        menu._id,
+      );
 
       // 2. Time Match Score (0.2 weight)
-      const timeMatch = calculateTimeMatch(menu.category, currentTimeSlot, relevantCategories);
+      const timeMatch = calculateTimeMatch(
+        menu.category,
+        currentTimeSlot,
+        relevantCategories,
+      );
 
       // 3. Location Trend Score (0.2 weight)
-      const locationTrend = calculateLocationTrend(userOrders, menu, user.location);
+      const locationTrend = calculateLocationTrend(
+        userOrders,
+        menu,
+        user.location,
+      );
 
       // 4. Budget Match Score (0.2 weight)
       const budgetMatch = calculateBudgetMatch(menu.price, userBudget);
 
       // Calculate total score
-      const totalScore = (
-        (pastOrderFrequency * 0.4) +
-        (timeMatch * 0.2) +
-        (locationTrend * 0.2) +
-        (budgetMatch * 0.2)
-      );
+      const totalScore =
+        pastOrderFrequency * 0.4 +
+        timeMatch * 0.2 +
+        locationTrend * 0.2 +
+        budgetMatch * 0.2;
 
       return {
         _id: menu._id,
@@ -93,20 +106,22 @@ const generateSmartSuggestions = async (userId) => {
         category: menu.category,
         veg: menu.veg,
         imageUrl: menu.imageUrl,
-        restaurant: restaurant ? {
-          _id: restaurant._id,
-          name: restaurant.name,
-          location: restaurant.location,
-          rating: restaurant.rating
-        } : null,
+        restaurant: restaurant
+          ? {
+              _id: restaurant._id,
+              name: restaurant.name,
+              location: restaurant.location,
+              rating: restaurant.rating,
+            }
+          : null,
         scores: {
           pastOrderFrequency,
           timeMatch,
           locationTrend,
           budgetMatch,
-          total: totalScore
+          total: totalScore,
         },
-        timeSlot: currentTimeSlot
+        timeSlot: currentTimeSlot,
       };
     });
 
@@ -116,9 +131,8 @@ const generateSmartSuggestions = async (userId) => {
       .slice(0, 5);
 
     return topSuggestions;
-
   } catch (error) {
-    console.error('Error in generateSmartSuggestions:', error);
+    console.error("Error in generateSmartSuggestions:", error);
     // Return popular items as fallback
     return getFallbackSuggestions();
   }
@@ -131,9 +145,12 @@ const calculatePastOrderFrequency = (userOrders, menuItemId) => {
   if (!userOrders || userOrders.length === 0) return 0.3;
 
   let orderCount = 0;
-  userOrders.forEach(order => {
-    order.items.forEach(item => {
-      if (item.menuItemId && item.menuItemId.toString() === menuItemId.toString()) {
+  userOrders.forEach((order) => {
+    order.items.forEach((item) => {
+      if (
+        item.menuItemId &&
+        item.menuItemId.toString() === menuItemId.toString()
+      ) {
         orderCount++;
       }
     });
@@ -171,7 +188,7 @@ const calculateLocationTrend = (userOrders, menuItem, userLocation) => {
  */
 const calculateBudgetMatch = (price, budgetRange) => {
   const { min, max } = budgetRange;
-  
+
   if (price >= min && price <= max) {
     // Within budget - calculate how well it fits
     const range = max - min;
@@ -183,7 +200,7 @@ const calculateBudgetMatch = (price, budgetRange) => {
   } else {
     // Above budget - penalize
     const excess = price - max;
-    return Math.max(0, 1 - (excess / 100)); // Reduce score for being over budget
+    return Math.max(0, 1 - excess / 100); // Reduce score for being over budget
   }
 };
 
@@ -192,11 +209,11 @@ const calculateBudgetMatch = (price, budgetRange) => {
  */
 const getFallbackSuggestions = async () => {
   const popularItems = await Menu.find({ available: true })
-    .populate('restaurantId', 'name location rating')
+    .populate("restaurantId", "name location rating")
     .sort({ popularity: -1 })
     .limit(5);
 
-  return popularItems.map(item => ({
+  return popularItems.map((item) => ({
     _id: item._id,
     name: item.name,
     price: item.price,
@@ -209,13 +226,13 @@ const getFallbackSuggestions = async () => {
       timeMatch: 0.5,
       locationTrend: 0.5,
       budgetMatch: 0.5,
-      total: 0.5
+      total: 0.5,
     },
-    timeSlot: getTimeSlot()
+    timeSlot: getTimeSlot(),
   }));
 };
 
 module.exports = {
   generateSmartSuggestions,
-  getTimeSlot
+  getTimeSlot,
 };

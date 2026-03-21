@@ -1,11 +1,14 @@
 // server/seed.js
-// Seed data for testing the application
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const mongoose = require('mongoose');
-require('dotenv').config();
+const bcrypt = require('bcryptjs'); // Make sure this is installed!
 
+// Import models
 const Restaurant = require('./models/Restaurant');
 const Menu = require('./models/Menu');
+const User = require('./models/User'); // Import your User model
 
 const restaurants = [
   {
@@ -87,7 +90,6 @@ const restaurants = [
     imageUrl: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400'
   }
 ];
-
 const menuItems = [
   // Biryani House Menu
   {
@@ -97,7 +99,8 @@ const menuItems = [
     category: 'lunch',
     veg: false,
     restaurantIndex: 0,
-    popularity: 150
+    popularity: 150,
+    imageUrl: 'https://images.pexels.com/photos/958545/pexels-photo-958545.jpeg?w=400'
   },
   {
     name: 'Mutton Biryani',
@@ -106,7 +109,8 @@ const menuItems = [
     category: 'lunch',
     veg: false,
     restaurantIndex: 0,
-    popularity: 120
+    popularity: 120,
+    imageUrl: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=400'
   },
   {
     name: 'Vegetable Biryani',
@@ -115,7 +119,8 @@ const menuItems = [
     category: 'lunch',
     veg: true,
     restaurantIndex: 0,
-    popularity: 80
+    popularity: 80,
+    imageUrl: 'https://images.pexels.com/photos/1111317/pexels-photo-1111317.jpeg?w=400'
   },
   {
     name: 'Chicken 65',
@@ -124,7 +129,8 @@ const menuItems = [
     category: 'snacks',
     veg: false,
     restaurantIndex: 0,
-    popularity: 90
+    popularity: 90,
+    imageUrl: 'https://images.unsplash.com/photo-1610057099443-fde8c4d50f91?w=400'
   },
   {
     name: 'Dal Makhani',
@@ -133,7 +139,8 @@ const menuItems = [
     category: 'lunch',
     veg: true,
     restaurantIndex: 0,
-    popularity: 70
+    popularity: 70,
+    imageUrl: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400'
   },
   // Green Leaf Kitchen Menu
   {
@@ -143,7 +150,8 @@ const menuItems = [
     category: 'breakfast',
     veg: true,
     restaurantIndex: 1,
-    popularity: 200
+    popularity: 200,
+    imageUrl: 'https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg?w=400'
   },
   {
     name: 'Idli Sambar',
@@ -152,7 +160,8 @@ const menuItems = [
     category: 'breakfast',
     veg: true,
     restaurantIndex: 1,
-    popularity: 180
+    popularity: 180,
+    imageUrl: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400'
   },
   {
     name: 'Vegetable Uttapam',
@@ -161,7 +170,8 @@ const menuItems = [
     category: 'breakfast',
     veg: true,
     restaurantIndex: 1,
-    popularity: 100
+    popularity: 100,
+    imageUrl: 'https://images.unsplash.com/photo-1630409351241-e90e7f5e434d?w=400'
   },
   {
     name: 'Paneer Tikka',
@@ -170,7 +180,8 @@ const menuItems = [
     category: 'lunch',
     veg: true,
     restaurantIndex: 1,
-    popularity: 150
+    popularity: 150,
+    imageUrl: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400'
   },
   {
     name: 'Fresh Fruit Juice',
@@ -179,7 +190,8 @@ const menuItems = [
     category: 'beverages',
     veg: true,
     restaurantIndex: 1,
-    popularity: 80
+    popularity: 80,
+    imageUrl: 'https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?w=400'
   },
   // Pizza Paradise Menu
   {
@@ -189,7 +201,8 @@ const menuItems = [
     category: 'lunch',
     veg: true,
     restaurantIndex: 2,
-    popularity: 250
+    popularity: 250,
+    imageUrl: 'https://images.pexels.com/photos/825661/pexels-photo-825661.jpeg?w=400'
   },
   {
     name: 'Pepperoni Pizza',
@@ -198,7 +211,8 @@ const menuItems = [
     category: 'lunch',
     veg: false,
     restaurantIndex: 2,
-    popularity: 220
+    popularity: 220,
+    imageUrl: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400'
   },
   {
     name: 'Veggie Supreme',
@@ -207,7 +221,8 @@ const menuItems = [
     category: 'lunch',
     veg: true,
     restaurantIndex: 2,
-    popularity: 180
+    popularity: 180,
+    imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400'
   },
   {
     name: 'Garlic Bread',
@@ -216,7 +231,8 @@ const menuItems = [
     category: 'snacks',
     veg: true,
     restaurantIndex: 2,
-    popularity: 120
+    popularity: 120,
+    imageUrl: 'https://images.pexels.com/photos/2092507/pexels-photo-2092507.jpeg?w=400'
   },
   {
     name: 'Chocolate Lava Cake',
@@ -225,7 +241,8 @@ const menuItems = [
     category: 'desserts',
     veg: true,
     restaurantIndex: 2,
-    popularity: 200
+    popularity: 200,
+    imageUrl: 'https://images.unsplash.com/photo-1624353365286-3f8d62daad51?w=400'
   },
   // Spice Garden Menu
   {
@@ -235,7 +252,8 @@ const menuItems = [
     category: 'lunch',
     veg: false,
     restaurantIndex: 3,
-    popularity: 170
+    popularity: 170,
+    imageUrl: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400'
   },
   {
     name: 'Vegetable Noodles',
@@ -244,7 +262,8 @@ const menuItems = [
     category: 'lunch',
     veg: true,
     restaurantIndex: 3,
-    popularity: 140
+    popularity: 140,
+    imageUrl: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400'
   },
   {
     name: 'Spring Rolls',
@@ -253,7 +272,8 @@ const menuItems = [
     category: 'snacks',
     veg: true,
     restaurantIndex: 3,
-    popularity: 100
+    popularity: 100,
+    imageUrl: 'https://images.unsplash.com/photo-1606331191459-420dc2fa5d3d?w=400'
   },
   {
     name: 'Manchurian',
@@ -262,7 +282,8 @@ const menuItems = [
     category: 'snacks',
     veg: true,
     restaurantIndex: 3,
-    popularity: 160
+    popularity: 160,
+    imageUrl: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400'
   },
   // Southern Spice Menu
   {
@@ -272,7 +293,8 @@ const menuItems = [
     category: 'lunch',
     veg: false,
     restaurantIndex: 4,
-    popularity: 130
+    popularity: 130,
+    imageUrl: 'https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg?w=400'
   },
   {
     name: 'Fish Fry',
@@ -281,7 +303,8 @@ const menuItems = [
     category: 'lunch',
     veg: false,
     restaurantIndex: 4,
-    popularity: 110
+    popularity: 110,
+    imageUrl: 'https://images.unsplash.com/photo-1598514983318-29142275b1d4?w=400'
   },
   {
     name: 'Pongal',
@@ -290,7 +313,8 @@ const menuItems = [
     category: 'breakfast',
     veg: true,
     restaurantIndex: 4,
-    popularity: 90
+    popularity: 90,
+    imageUrl: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400'
   },
   {
     name: 'Chicken 65',
@@ -299,7 +323,8 @@ const menuItems = [
     category: 'snacks',
     veg: false,
     restaurantIndex: 4,
-    popularity: 140
+    popularity: 140,
+    imageUrl: 'https://images.unsplash.com/photo-1610057099443-fde8c4d50f91?w=400'
   },
   // Burger Barn Menu
   {
@@ -309,7 +334,8 @@ const menuItems = [
     category: 'lunch',
     veg: false,
     restaurantIndex: 5,
-    popularity: 200
+    popularity: 200,
+    imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400'
   },
   {
     name: 'Veggie Burger',
@@ -318,7 +344,8 @@ const menuItems = [
     category: 'lunch',
     veg: true,
     restaurantIndex: 5,
-    popularity: 150
+    popularity: 150,
+    imageUrl: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=400'
   },
   {
     name: 'Chicken Wings',
@@ -327,7 +354,8 @@ const menuItems = [
     category: 'snacks',
     veg: false,
     restaurantIndex: 5,
-    popularity: 180
+    popularity: 180,
+    imageUrl: 'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=400'
   },
   {
     name: 'Onion Rings',
@@ -336,7 +364,8 @@ const menuItems = [
     category: 'snacks',
     veg: true,
     restaurantIndex: 5,
-    popularity: 120
+    popularity: 120,
+    imageUrl: 'https://images.unsplash.com/photo-1639024471283-03518883512d?w=400'
   },
   {
     name: 'Milkshake',
@@ -345,33 +374,45 @@ const menuItems = [
     category: 'beverages',
     veg: true,
     restaurantIndex: 5,
-    popularity: 100
+    popularity: 100,
+    imageUrl: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400'
   }
 ];
-
 const seedDatabase = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('Connected to MongoDB');
+    const uri = process.env.MONGODB_URI;
+    if (!uri) throw new Error("MONGODB_URI not found in .env");
 
-    // Clear existing data
+    await mongoose.connect(uri);
+    console.log('Connected to MongoDB...');
+
+    // 1. Clear existing data
     await Restaurant.deleteMany({});
     await Menu.deleteMany({});
+    await User.deleteMany({});
     console.log('Cleared existing data');
 
-    // Insert restaurants
+    // 2. Create a Test User (Fixes your login issue!)
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash('password123', salt);
+    
+    await User.create({
+      name: 'Test User',
+      email: 'test@example.com',
+      password: hashedPassword
+    });
+    console.log('Created User: test@example.com / password123');
+
+    // 3. Insert restaurants
     const createdRestaurants = await Restaurant.insertMany(restaurants);
     console.log(`Created ${createdRestaurants.length} restaurants`);
 
-    // Insert menu items with correct restaurant references
+    // 4. Insert menu items with correct restaurant references
     const menuItemsToInsert = menuItems.map(item => ({
       ...item,
       restaurantId: createdRestaurants[item.restaurantIndex]._id
     }));
     
-    // Remove restaurantIndex from the objects
-    menuItemsToInsert.forEach(item => delete item.restaurantIndex);
-
     await Menu.insertMany(menuItemsToInsert);
     console.log(`Created ${menuItemsToInsert.length} menu items`);
 
@@ -383,4 +424,5 @@ const seedDatabase = async () => {
   }
 };
 
+// Execute the function
 seedDatabase();

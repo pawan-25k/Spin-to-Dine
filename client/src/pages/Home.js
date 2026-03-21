@@ -1,31 +1,28 @@
 // client/src/pages/Home.js
 // Home page with restaurant listings
 
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import RestaurantCard from '../components/RestaurantCard';
+
+const DEFAULT_FILTERS = {
+  search: '',
+  rating: '',
+  veg: false
+};
 
 const Home = () => {
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
-    search: '',
-    rating: '',
-    veg: false
-  });
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
-  useEffect(() => {
-    fetchRestaurants();
-  }, []);
-
-  const fetchRestaurants = async () => {
+  const fetchRestaurants = useCallback(async (activeFilters) => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (filters.search) params.append('search', filters.search);
-      if (filters.rating) params.append('rating', filters.rating);
-      if (filters.veg) params.append('veg', 'true');
+      if (activeFilters.search) params.append('search', activeFilters.search);
+      if (activeFilters.rating) params.append('rating', activeFilters.rating);
+      if (activeFilters.veg) params.append('veg', 'true');
 
       const response = await api.get(`/restaurants?${params.toString()}`);
       setRestaurants(response.data.restaurants || []);
@@ -34,7 +31,11 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchRestaurants(DEFAULT_FILTERS);
+  }, [fetchRestaurants]);
 
   const handleFilterChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -46,7 +47,7 @@ const Home = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchRestaurants();
+    fetchRestaurants(filters);
   };
 
   return (
@@ -93,7 +94,7 @@ const Home = () => {
             Veg Only
           </label>
 
-          <button onClick={fetchRestaurants} className="apply-filters-btn">
+          <button onClick={() => fetchRestaurants(filters)} className="apply-filters-btn">
             Apply Filters
           </button>
         </div>
@@ -108,8 +109,9 @@ const Home = () => {
           <div className="no-results">
             <p>No restaurants found</p>
             <button onClick={() => {
-              setFilters({ search: '', rating: '', veg: false });
-              fetchRestaurants();
+              const clearedFilters = { search: '', rating: '', veg: false };
+              setFilters(clearedFilters);
+              fetchRestaurants(clearedFilters);
             }} className="btn-secondary">
               Clear Filters
             </button>

@@ -1,17 +1,17 @@
 // client/src/components/SpinWheel.js
 // Spin-to-Dine gamification wheel component
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext';
-import spinService from '../services/spinService';
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
+import spinService from "../services/spinService";
 
 const SpinWheel = () => {
   const { user, isAuthenticated } = useAuth();
-  const { addToCart, restaurant: cartRestaurant } = useCart();
+  const { addToCart} = useCart();
   const navigate = useNavigate();
-  
+
   const [suggestions, setSuggestions] = useState([]);
   const [spinning, setSpinning] = useState(false);
   const [selectedDish, setSelectedDish] = useState(null);
@@ -20,16 +20,10 @@ const SpinWheel = () => {
   const [rotation, setRotation] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const angle = 360 / suggestions.length;
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    fetchSuggestions();
-  }, [isAuthenticated, navigate]);
 
-  const fetchSuggestions = async () => {
+  const fetchSuggestions = useCallback(async () => {
     try {
       setLoading(true);
       const data = await spinService.getSuggestions(user._id);
@@ -37,17 +31,25 @@ const SpinWheel = () => {
       setSpinCount(data.todaySpinCount || 0);
       setError(null);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load suggestions');
+      setError(err.response?.data?.message || "Failed to load suggestions");
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?._id]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    fetchSuggestions();
+  }, [isAuthenticated, navigate, fetchSuggestions]);
 
   const handleSpin = () => {
     if (spinning || suggestions.length === 0 || spinCount >= 3) return;
 
     setSpinning(true);
-    
+
     // Calculate random rotation (at least 5 full spins + random position)
     const newRotation = rotation + 1800 + Math.random() * 360;
     setRotation(newRotation);
@@ -59,12 +61,12 @@ const SpinWheel = () => {
       const normalizedRotation = newRotation % 360;
       const selectedIndex = Math.floor(normalizedRotation / segmentAngle);
       const dish = suggestions[suggestions.length - 1 - selectedIndex];
-      
+
       setSelectedDish(dish);
       setShowModal(true);
       setSpinning(false);
-      setSpinCount(prev => prev + 1);
-      
+      setSpinCount((prev) => prev + 1);
+
       // Log the spin
       logSpin(dish);
     }, 3000);
@@ -76,10 +78,10 @@ const SpinWheel = () => {
         menuItemId: dish._id,
         restaurantId: dish.restaurant?._id,
         score: dish.scores?.total,
-        timeSlot: dish.timeSlot
+        timeSlot: dish.timeSlot,
       });
     } catch (err) {
-      console.error('Failed to log spin:', err);
+      console.error("Failed to log spin:", err);
     }
   };
 
@@ -89,20 +91,23 @@ const SpinWheel = () => {
     const restaurantInfo = {
       _id: selectedDish.restaurant?._id,
       name: selectedDish.restaurant?.name,
-      location: selectedDish.restaurant?.location
+      location: selectedDish.restaurant?.location,
     };
 
-    addToCart({
-      _id: selectedDish._id,
-      name: selectedDish.name,
-      price: selectedDish.price,
-      imageUrl: selectedDish.imageUrl,
-      restaurant: selectedDish.restaurant
-    }, restaurantInfo);
+    addToCart(
+      {
+        _id: selectedDish._id,
+        name: selectedDish.name,
+        price: selectedDish.price,
+        imageUrl: selectedDish.imageUrl,
+        restaurant: selectedDish.restaurant,
+      },
+      restaurantInfo,
+    );
 
     setShowModal(false);
     setSelectedDish(null);
-    navigate('/cart');
+    navigate("/cart");
   };
 
   const closeModal = () => {
@@ -113,7 +118,9 @@ const SpinWheel = () => {
   if (loading) {
     return (
       <div className="spin-container">
-        <div className="loading-spinner">Loading your personalized recommendations...</div>
+        <div className="loading-spinner">
+          Loading your personalized recommendations...
+        </div>
       </div>
     );
   }
@@ -122,7 +129,9 @@ const SpinWheel = () => {
     return (
       <div className="spin-container">
         <div className="error-message">{error}</div>
-        <button onClick={fetchSuggestions} className="btn-primary">Try Again</button>
+        <button onClick={fetchSuggestions} className="btn-primary">
+          Try Again
+        </button>
       </div>
     );
   }
@@ -138,29 +147,40 @@ const SpinWheel = () => {
       </div>
 
       <div className="spin-wheel-wrapper">
-        <div 
-          className={`spin-wheel ${spinning ? 'spinning' : ''}`}
+        <div
+          className={`spin-wheel ${spinning ? "spinning" : ""}`}
           style={{ transform: `rotate(${rotation}deg)` }}
         >
           {suggestions.map((dish, index) => (
-            <div 
-              key={dish._id} 
+            <div
+              key={dish._id}
               className="wheel-segment"
               style={{
-                transform: `rotate(${index * (360 / suggestions.length)}deg)`
+                transform: `rotate(${index * angle}deg)`,
               }}
             >
-              <span className="segment-text">{dish.name.substring(0, 15)}</span>
+              <span
+                className="segment-text"
+                style={{
+                  transform: `rotate(${angle / 2}deg)`,
+                }}
+              >
+                {dish.name.substring(0, 15)}
+              </span>
             </div>
           ))}
         </div>
-        
-        <button 
+
+        <button
           className="spin-button"
           onClick={handleSpin}
           disabled={spinning || spinCount >= 3 || suggestions.length === 0}
         >
-          {spinning ? 'Spinning...' : spinCount >= 3 ? 'No Spins Left' : 'SPIN!'}
+          {spinning
+            ? "Spinning..."
+            : spinCount >= 3
+              ? "No Spins Left"
+              : "SPIN!"}
         </button>
       </div>
 
@@ -171,13 +191,20 @@ const SpinWheel = () => {
         </p>
         <div className="suggestions-grid">
           {suggestions.map((dish, index) => (
-            <div key={dish._id} className="suggestion-card" onClick={() => {
-              setSelectedDish(dish);
-              setShowModal(true);
-            }}>
+            <div
+              key={dish._id}
+              className="suggestion-card"
+              onClick={() => {
+                setSelectedDish(dish);
+                setShowModal(true);
+              }}
+            >
               <span className="suggestion-rank">#{index + 1}</span>
-              <img 
-                src={dish.imageUrl || 'https://via.placeholder.com/100x100?text=Dish'} 
+              <img
+                src={
+                  dish.imageUrl ||
+                  "https://via.placeholder.com/100x100?text=Dish"
+                }
                 alt={dish.name}
               />
               <h4>{dish.name}</h4>
@@ -186,12 +213,14 @@ const SpinWheel = () => {
               <div className="match-score">
                 <span className="score-label">Match:</span>
                 <div className="score-bar">
-                  <div 
-                    className="score-fill" 
+                  <div
+                    className="score-fill"
                     style={{ width: `${(dish.scores?.total || 0) * 100}%` }}
                   ></div>
                 </div>
-                <span className="score-value">{Math.round((dish.scores?.total || 0) * 100)}%</span>
+                <span className="score-value">
+                  {Math.round((dish.scores?.total || 0) * 100)}%
+                </span>
               </div>
             </div>
           ))}
@@ -200,19 +229,33 @@ const SpinWheel = () => {
 
       {showModal && selectedDish && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={closeModal}>&times;</button>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={closeModal}>
+              &times;
+            </button>
             <h2>🎉 You got: {selectedDish.name}</h2>
-            <img 
-              src={selectedDish.imageUrl || 'https://via.placeholder.com/200x200?text=Dish'} 
+            <img
+              src={
+                selectedDish.imageUrl ||
+                "https://via.placeholder.com/200x200?text=Dish"
+              }
               alt={selectedDish.name}
               className="modal-image"
             />
             <div className="modal-details">
-              <p><strong>Restaurant:</strong> {selectedDish.restaurant?.name}</p>
-              <p><strong>Price:</strong> ₹{selectedDish.price}</p>
-              <p><strong>Category:</strong> {selectedDish.category}</p>
-              <p><strong>Match Score:</strong> {Math.round((selectedDish.scores?.total || 0) * 100)}%</p>
+              <p>
+                <strong>Restaurant:</strong> {selectedDish.restaurant?.name}
+              </p>
+              <p>
+                <strong>Price:</strong> ₹{selectedDish.price}
+              </p>
+              <p>
+                <strong>Category:</strong> {selectedDish.category}
+              </p>
+              <p>
+                <strong>Match Score:</strong>{" "}
+                {Math.round((selectedDish.scores?.total || 0) * 100)}%
+              </p>
             </div>
             <div className="modal-actions">
               <button className="btn-primary" onClick={handleAddToCart}>

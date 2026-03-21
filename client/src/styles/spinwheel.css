@@ -346,3 +346,12 @@
     height: 80px;
   }
 }
+
+.segment-text {
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+  transform-origin: center;
+  white-space: nowrap;
+}

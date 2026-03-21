@@ -3,8 +3,10 @@
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const connectDB = require('./config/db');
-require('dotenv').config();
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');

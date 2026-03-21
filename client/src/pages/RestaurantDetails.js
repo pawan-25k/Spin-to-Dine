@@ -1,13 +1,12 @@
 // client/src/pages/RestaurantDetails.js
-// Restaurant details and menu page
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../services/api';
 import { useCart } from '../context/CartContext';
 
 const RestaurantDetails = () => {
-  const { id } = useParams();
+  // 1. Hooks
+  const { id } = useParams(); // Note: matches the :id in App.js
   const { addToCart, cart } = useCart();
   
   const [restaurant, setRestaurant] = useState(null);
@@ -16,26 +15,28 @@ const RestaurantDetails = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [vegOnly, setVegOnly] = useState(false);
 
+  // 2. Side Effects
   useEffect(() => {
+    const fetchRestaurantAndMenu = async () => {
+      try {
+        setLoading(true);
+        const [restaurantRes, menuRes] = await Promise.all([
+          api.get(`/restaurants/${id}`),
+          api.get(`/restaurants/${id}/menu`)
+        ]);
+        setRestaurant(restaurantRes.data);
+        setMenu(menuRes.data);
+      } catch (error) {
+        console.error('Error fetching restaurant:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchRestaurantAndMenu();
   }, [id]);
 
-  const fetchRestaurantAndMenu = async () => {
-    try {
-      setLoading(true);
-      const [restaurantRes, menuRes] = await Promise.all([
-        api.get(`/restaurants/${id}`),
-        api.get(`/restaurants/${id}/menu`)
-      ]);
-      setRestaurant(restaurantRes.data);
-      setMenu(menuRes.data);
-    } catch (error) {
-      console.error('Error fetching restaurant:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // 3. Helper Logic
   const categories = ['all', 'breakfast', 'lunch', 'dinner', 'snacks', 'beverages', 'desserts'];
 
   const filteredMenu = menu.filter(item => {
@@ -45,6 +46,7 @@ const RestaurantDetails = () => {
   });
 
   const handleAddToCart = (item) => {
+    if (!restaurant) return;
     addToCart(item, {
       _id: restaurant._id,
       name: restaurant.name,
@@ -56,6 +58,7 @@ const RestaurantDetails = () => {
     return cart.some(item => item._id === itemId);
   };
 
+  // 4. Conditional Rendering (These MUST be inside the function)
   if (loading) {
     return <div className="loading-spinner">Loading restaurant...</div>;
   }
@@ -64,6 +67,7 @@ const RestaurantDetails = () => {
     return <div className="error-message">Restaurant not found</div>;
   }
 
+  // 5. Main JSX Return
   return (
     <div className="restaurant-details-page">
       <div className="restaurant-hero">
@@ -134,9 +138,9 @@ const RestaurantDetails = () => {
                     <button
                       className={`add-btn ${isInCart(item._id) ? 'in-cart' : ''}`}
                       onClick={() => handleAddToCart(item)}
-                      disabled={!item.available}
+                      disabled={item.available === false}
                     >
-                      {isInCart(item._id) ? 'Added ✓' : item.available ? 'Add +' : 'Unavailable'}
+                      {isInCart(item._id) ? 'Added ✓' : item.available !== false ? 'Add +' : 'Unavailable'}
                     </button>
                   </div>
                 </div>
@@ -147,6 +151,6 @@ const RestaurantDetails = () => {
       </div>
     </div>
   );
-};
+}; // <--- Ensure this closing brace is at the VERY end!
 
 export default RestaurantDetails;
