@@ -33,7 +33,7 @@ A full-stack gamified food recommendation system that helps users decide what to
 ## 📁 Project Structure
  
  ```
-Gamification
+Spin-to-Dine
 │
 ├── server (Backend)
 │   ├── config
