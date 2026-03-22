@@ -119,7 +119,7 @@ Spin-to-Dine
 ### 1️⃣ Clone the Repository
 
 ```
-git clone https://github.com/vikkukrr/Spin-to-Dine
+git clone https://github.com/pawan-25k/Spin-to-Dine
 
 cd Spin-to-Dine
 ```
