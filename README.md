@@ -119,9 +119,9 @@ Spin-to-Dine
 ### 1️⃣ Clone the Repository
 
 ```
-git clone https://github.com/your-username/Gamification
+git clone https://github.com/vikkukrr/Spin-to-Dine
 
-cd Gamification
+cd Spin-to-Dine
 ```
 ---
 
@@ -187,9 +187,9 @@ This project is useful for:
 
 ## 👨‍💻 Author
 
-**Pawan Kumar**
+**Pawan Kumar** --[@pawan-25k]
 
-**Vikram Kumar Paswan**
+**Vikram Kumar Paswan** --[@vikkukrr]
 
 ---
 
